@@ -318,6 +318,24 @@ describe("groupItems", () => {
         expect(res.orderedItems).toEqual([]);
         expect(res.groups).toEqual([]);
     });
+
+    it("keeps a genuine '(leeg)' value separate from truly empty cells", () => {
+        // Runs are detected on the raw value, so an empty cell only ever
+        // groups with other empties even if a real value equals the label.
+        const data = [
+            item("a", { city: "" }),
+            item("b", { city: EMPTY_GROUP_LABEL }),
+            item("c", { city: "" }),
+        ];
+        const res = groupItems(data, "city");
+        expect(res.groups).toHaveLength(2);
+        // "" sorts before "(leeg)": empties (2) then the literal value (1);
+        // both are displayed under the same label.
+        expect((res.groups || []).map((g) => [g.name, g.count])).toEqual([
+            [EMPTY_GROUP_LABEL, 2],
+            [EMPTY_GROUP_LABEL, 1],
+        ]);
+    });
 });
 
 describe("computeVisualRows", () => {

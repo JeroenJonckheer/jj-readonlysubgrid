@@ -16,7 +16,9 @@
  *     displayName, plus optional user reordering (Move left / Move right);
  *   - format cells via record.getFormattedValue;
  *   - render lookup columns as blue links that open the looked-up record
- *     (click stopPropagation so the row-link still fires elsewhere);
+ *     (the link click stops propagation so it opens the related record
+ *     WITHOUT also firing the row's open-this-record handler; clicking
+ *     anywhere else on the row still opens the row's own record);
  *   - size columns from the view's visualSizeFactor, with drag-resize and
  *     a "Column width" dialog;
  *   - per-column dropdown: A→Z / Z→A (server-side sort via dataset.refresh),

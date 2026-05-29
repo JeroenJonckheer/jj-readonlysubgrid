@@ -496,28 +496,33 @@ export function groupItems(
 
     const groups: IGridGroup[] = [];
     let start = 0;
-    let currentValue: string | null = null;
+    // Detect runs by the RAW cell value ("" for empty), and use
+    // EMPTY_GROUP_LABEL only as the *displayed* name. If the label were used
+    // as the comparison key, a genuine value that happened to equal the label
+    // would merge with the empty group. currentRaw === null means "no group
+    // open yet" (raw is always a string, never null).
+    let currentRaw: string | null = null;
 
     for (let i = 0; i < sorted.length; i++) {
-        const v = (sorted[i][groupByColumn] as string) || EMPTY_GROUP_LABEL;
-        if (currentValue === null) {
-            currentValue = v;
+        const raw = (sorted[i][groupByColumn] as string) || "";
+        if (currentRaw === null) {
+            currentRaw = raw;
             start = 0;
-        } else if (v !== currentValue) {
+        } else if (raw !== currentRaw) {
             groups.push({
                 key: "g-" + groups.length,
-                name: currentValue,
+                name: currentRaw || EMPTY_GROUP_LABEL,
                 startIndex: start,
                 count: i - start,
             });
             start = i;
-            currentValue = v;
+            currentRaw = raw;
         }
     }
-    if (currentValue !== null) {
+    if (currentRaw !== null) {
         groups.push({
             key: "g-" + groups.length,
-            name: currentValue,
+            name: currentRaw || EMPTY_GROUP_LABEL,
             startIndex: start,
             count: sorted.length - start,
         });
