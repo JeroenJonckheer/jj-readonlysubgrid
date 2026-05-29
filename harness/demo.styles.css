@@ -1,0 +1,73 @@
+/*
+ * Author: Jeroen Jonckheer
+ * Demo-page chrome (NOT part of the shipped control). Provides a neutral
+ * backdrop and a faux window frame so the recorded demo reads as "a grid on
+ * a form" rather than a bare component on a white page.
+ */
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #f3f2f1;
+    font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.demo-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.demo-frame {
+    width: 900px;
+    border: 1px solid #e1dfdd;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.demo-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #faf9f8;
+    border-bottom: 1px solid #edebe9;
+}
+
+.demo-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.demo-dot-r { background: #ff5f57; }
+.demo-dot-y { background: #febc2e; }
+.demo-dot-g { background: #28c840; }
+
+.demo-title {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #323130;
+}
+
+.demo-grid {
+    padding: 0;
+}
+
+.demo-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #323130;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
