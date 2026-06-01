@@ -75,7 +75,7 @@ test("read-only subgrid demo", async ({ page }) => {
     await link.hover();
     await page.waitForTimeout(500);
     await link.click();
-    await page.waitForTimeout(1800);
+    await page.waitForTimeout(800);
 
     // Sanity assertion so the test is also a smoke test, not just a recorder.
     await expect(page.locator(".jj-readonly-subgrid-row").first()).toBeVisible();

@@ -69,7 +69,6 @@ const DemoApp: React.FC = () => {
         name: null,
         desc: false,
     });
-    const [toast, setToast] = React.useState<string>("");
 
     // Re-sort the mock records when the user picks a sort, mimicking the
     // server-side refresh the real control triggers via index.ts.
@@ -100,11 +99,6 @@ const DemoApp: React.FC = () => {
         [records, sort]
     );
 
-    const showToast = (msg: string) => {
-        setToast(msg);
-        window.setTimeout(() => setToast(""), 1600);
-    };
-
     return (
         <div className="demo-page">
             <div className="demo-frame">
@@ -116,13 +110,12 @@ const DemoApp: React.FC = () => {
                         dataset={dataset}
                         width={900}
                         height={470}
-                        onOpenRecord={(entity, id) => showToast("Opening " + entity + " " + id)}
+                        onOpenRecord={() => undefined}
                         onLoadMore={() => undefined}
                         onSort={(name, desc) => setSort({ name, desc })}
                     />
                 </div>
             </div>
-            {toast ? <div className="demo-toast">{toast}</div> : null}
         </div>
     );
 };

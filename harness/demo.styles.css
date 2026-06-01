@@ -50,15 +50,3 @@ html, body {
     padding: 0;
 }
 
-.demo-toast {
-    position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #323130;
-    color: #ffffff;
-    padding: 10px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
