@@ -32,7 +32,7 @@ initializeIcons();
 const DemoCursor: React.FC = () => {
     const ref = React.useRef<HTMLDivElement | null>(null);
     React.useEffect(() => {
-        const move = (e: MouseEvent) => {
+        const move = (e: MouseEvent | PointerEvent) => {
             const el = ref.current;
             if (el) {
                 el.style.transform =
@@ -41,13 +41,22 @@ const DemoCursor: React.FC = () => {
         };
         const down = () => ref.current && ref.current.classList.add("is-press");
         const up = () => ref.current && ref.current.classList.remove("is-press");
-        window.addEventListener("mousemove", move);
-        window.addEventListener("mousedown", down);
-        window.addEventListener("mouseup", up);
+        // CAPTURE phase on document: Fluent UI's ContextualMenu/Callout
+        // sit in a Layer that handles pointer events for dismissal and can
+        // stop propagation on the bubble phase - listening in the capture
+        // phase guarantees we see every move regardless of overlays.
+        // Also listen for pointermove as a redundant channel in case
+        // mousemove dispatching is suppressed somewhere.
+        const opts: AddEventListenerOptions = { capture: true };
+        document.addEventListener("mousemove", move as EventListener, opts);
+        document.addEventListener("pointermove", move as EventListener, opts);
+        document.addEventListener("mousedown", down, opts);
+        document.addEventListener("mouseup", up, opts);
         return () => {
-            window.removeEventListener("mousemove", move);
-            window.removeEventListener("mousedown", down);
-            window.removeEventListener("mouseup", up);
+            document.removeEventListener("mousemove", move as EventListener, opts);
+            document.removeEventListener("pointermove", move as EventListener, opts);
+            document.removeEventListener("mousedown", down, opts);
+            document.removeEventListener("mouseup", up, opts);
         };
     }, []);
     return (
