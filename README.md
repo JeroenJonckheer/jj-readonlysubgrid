@@ -1,6 +1,6 @@
 # JJ Read-only Subgrid
 
-A **read-only dataset PCF control** for Power Apps model-driven apps. It replaces the standard editable subgrid with a clean, fast, read-only grid that looks and feels like the native modern grid — but with the command bar (New / Add Existing / Delete) and inline editing intentionally removed.
+**Exactly the model-driven subgrid your users already know — same look, same feel, same sort/group/filter/lookup behaviour — minus only the buttons we deliberately left out (New, Add Existing, Delete, inline edit).** A drop-in, per-instance read-only replacement for the standard subgrid.
 
 Built with the [Power Apps Component Framework](https://learn.microsoft.com/power-apps/developer/component-framework/overview), React 16 and Fluent UI v8.
 
@@ -12,9 +12,13 @@ Built with the [Power Apps Component Framework](https://learn.microsoft.com/powe
 
 ---
 
-## Why
+## Why this exists
 
-The out-of-the-box subgrid is editable and shows a command bar. On many forms you want users to **see related records and click through to them, but not create, add, edit or delete from the subgrid**. Hiding the command bar via configuration alone is inconsistent across hosts. This control renders the bound view as a read-only Fluent UI `DetailsList`, so the read-only intent is enforced by the control itself.
+Every Power Platform pro has run into this: you want a subgrid of a related entity on a form, but **on this one specific spot** users should not be able to add, remove or edit rows. It is reference data, audit context, a parent-child read-out, a "related" tab that should be informational only — pick your scenario. At the same time, on *every other* place the same entity's subgrid appears, the ribbon needs to stay fully functional so users can still create / add / delete there.
+
+Stripping the table-level ribbon kills it everywhere. Hiding the command bar via host-level configuration is inconsistent across surfaces and bleeds across views. JJ Read-only Subgrid fixes this the right way: **apply it only where you want read-only**. The global ribbon stays intact for every other instance of the same subgrid.
+
+What you get is the exact same subgrid your users are used to — sorting, grouping, filtering, lookup links, click-through to open the record, the modern grid pitch and feel — only **without** the command bar (New / Add Existing / Delete) and **without** inline editing. That's it. Nothing more removed, nothing extra bolted on.
 
 ## Features
 
