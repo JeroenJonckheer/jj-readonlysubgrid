@@ -9,7 +9,7 @@
  * gridLogic and the component without dragging in the whole framework.
  *
  * Keep this in sync with the dataset members gridLogic.ts / the component
- * actually read — if you start using a new dataset member in production,
+ * actually read: if you start using a new dataset member in production,
  * add it here too so the tests exercise the same surface.
  */
 

@@ -1,6 +1,6 @@
 # JJ Read-only Subgrid
 
-**Exactly the model-driven subgrid your users already know — same look, same feel, same sort/group/filter/lookup behaviour — minus only the buttons we deliberately left out (New, Add Existing, Delete, inline edit).** A drop-in, per-instance read-only replacement for the standard subgrid.
+**Exactly the model-driven subgrid your users already know.** Same look, same feel, same sort/group/filter/lookup behaviour. The only difference is that the buttons we deliberately left out (New, Add Existing, Delete, inline edit) are gone. A drop-in, per-instance read-only replacement for the standard subgrid.
 
 Built with the [Power Apps Component Framework](https://learn.microsoft.com/power-apps/developer/component-framework/overview), React 16 and Fluent UI v8.
 
@@ -14,22 +14,22 @@ Built with the [Power Apps Component Framework](https://learn.microsoft.com/powe
 
 ## Why this exists
 
-Every Power Platform pro has run into this: you want a subgrid of a related entity on a form, but **on this one specific spot** users should not be able to add, remove or edit rows. It is reference data, audit context, a parent-child read-out, a "related" tab that should be informational only — pick your scenario. At the same time, on *every other* place the same entity's subgrid appears, the ribbon needs to stay fully functional so users can still create / add / delete there.
+Every Power Platform pro has run into this: you want a subgrid of a related entity on a form, but **on this one specific spot** users should not be able to add, remove or edit rows. It is reference data, audit context, a parent-child read-out, a "related" tab that should be informational only: pick your scenario. At the same time, on *every other* place the same entity's subgrid appears, the ribbon needs to stay fully functional so users can still create / add / delete there.
 
 Stripping the table-level ribbon kills it everywhere. Hiding the command bar via host-level configuration is inconsistent across surfaces and bleeds across views. JJ Read-only Subgrid fixes this the right way: **apply it only where you want read-only**. The global ribbon stays intact for every other instance of the same subgrid.
 
-What you get is the exact same subgrid your users are used to — sorting, grouping, filtering, lookup links, click-through to open the record, the modern grid pitch and feel — only **without** the command bar (New / Add Existing / Delete) and **without** inline editing. That's it. Nothing more removed, nothing extra bolted on.
+What you get is the exact same subgrid your users are used to, with sorting, grouping, filtering, lookup links, click-through to open the record, and the modern grid pitch and feel. The only thing missing is the command bar (New / Add Existing / Delete) and inline editing. That's it. Nothing more removed, nothing extra bolted on.
 
 ## Features
 
-- **Read-only by design** — no command bar, no toolbar, no New/Add/Delete, no inline edit.
-- **Native-grid look** — row/header pitch calibrated to the standard Power Apps modern grid (42&nbsp;px), native scrollbars, sticky header.
-- **Click-through navigation** — click a row to open the record; lookup cells render as links that open the *related* record (click stops propagation so it never double-opens).
-- **Column tools** — per-column dropdown: A→Z / Z→A (server-side sort), Group by / Ungroup, Filter by (client-side contains), Column width dialog, Move left / Move right, drag-resize.
-- **Smart paging** — eagerly pre-loads past the host's tiny default page size, then lazy-loads more as you scroll.
-- **Lookup-aware** — resolves single, customer, owner and party-list lookups into navigable links.
-- **Resilient** — a single malformed record or unreadable column never blanks the whole grid.
-- **Localized strings** — Dutch UI labels (easily extendable via the resx).
+- **Read-only by design**: no command bar, no toolbar, no New/Add/Delete, no inline edit.
+- **Native-grid look**: row/header pitch calibrated to the standard Power Apps modern grid (42&nbsp;px), native scrollbars, sticky header.
+- **Click-through navigation**: click a row to open the record; lookup cells render as links that open the *related* record (click stops propagation so it never double-opens).
+- **Column tools**: per-column dropdown: A→Z / Z→A (server-side sort), Group by / Ungroup, Filter by (client-side contains), Column width dialog, Move left / Move right, drag-resize.
+- **Smart paging**: eagerly pre-loads past the host's tiny default page size, then lazy-loads more as you scroll.
+- **Lookup-aware**: resolves single, customer, owner and party-list lookups into navigable links.
+- **Resilient**: a single malformed record or unreadable column never blanks the whole grid.
+- **Localized strings**: Dutch UI labels (easily extendable via the resx).
 
 ## Requirements
 
@@ -48,7 +48,7 @@ npm test           # jest unit + render tests
 
 ## Deploy
 
-### Easiest — import the managed solution
+### Easiest: import the managed solution
 
 1. Grab **`JJReadOnlySubgrid_managed.zip`** from the [latest release](https://github.com/JeroenJonckheer/jj-readonlysubgrid/releases/latest).
 2. In Power Apps → **Solutions** → **Import solution** → upload the zip → Next → Import.
@@ -58,7 +58,7 @@ The control appears in Dataverse as **`jj_Grids.ReadOnlySubgrid`** and is ready 
 
 > An unmanaged zip (`JJReadOnlySubgrid_unmanaged.zip`) is published next to the managed one for sandbox / customization scenarios.
 
-### For developers — `pac pcf push`
+### For developers: `pac pcf push`
 
 If you are iterating on the source, push straight into your environment:
 
@@ -112,8 +112,8 @@ The split is deliberate: **`gridLogic.ts` is pure** (no React/DOM) so it can be 
 npm test
 ```
 
-- `tests/gridLogic.test.ts` — pure-logic unit tests (column ordering, width resolution, lookup extraction, row building, filtering, grouping, sizing math).
-- `tests/ReadOnlySubgridComponent.test.tsx` — render/interaction tests with a mocked dataset (rows, empty/loading states, row & lookup navigation, eager paging).
+- `tests/gridLogic.test.ts`: pure-logic unit tests (column ordering, width resolution, lookup extraction, row building, filtering, grouping, sizing math).
+- `tests/ReadOnlySubgridComponent.test.tsx`: render/interaction tests with a mocked dataset (rows, empty/loading states, row & lookup navigation, eager paging).
 
 ## Documentation
 

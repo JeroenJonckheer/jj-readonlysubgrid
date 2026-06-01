@@ -40,7 +40,7 @@
  *              the header so the two stay horizontally in lock-step;
  *   - footer : fixed-height row-count band pinned to the bottom.
  *
- * No command bar, toolbar, or New/Add/Delete actions are rendered — this
+ * No command bar, toolbar, or New/Add/Delete actions are rendered: this
  * control deliberately replaces the editable subgrid with a read-only view.
  */
 
@@ -368,8 +368,8 @@ export const ReadOnlySubgridComponent: React.FC<IReadOnlySubgridComponentProps> 
     // ---- Build FluentUI IColumn[] -------------------------------------------
     // Translates our ordered dataset columns into DetailsList column defs,
     // wiring width (user override or view width), sort/filter/group flags
-    // for the header affordances, the dropdown trigger, and — for lookup
-    // columns only — the custom link renderer.
+    // for the header affordances, the dropdown trigger, and: for lookup
+    // columns only: the custom link renderer.
     const columns: IColumn[] = React.useMemo(() => {
         return baseColumns.map<IColumn>((c) => {
             const w =
@@ -495,7 +495,7 @@ export const ReadOnlySubgridComponent: React.FC<IReadOnlySubgridComponentProps> 
     // a custom user font that shifts the rendered size by a few px still
     // lands the layout on a clean row boundary instead of clipping. In a
     // non-layout environment (e.g. jsdom) offsetHeight is 0, so the
-    // estimates are kept — which is exactly what we want for tests.
+    // estimates are kept: which is exactly what we want for tests.
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const [measured, setMeasured] = React.useState<{
         row: number;

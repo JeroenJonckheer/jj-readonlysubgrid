@@ -169,7 +169,7 @@ export function isLookupColumn(dataType: string | undefined): boolean {
  * We intentionally do NOT auto-distribute widths across the container.
  * That would fight the view definition. If the total exceeds the
  * container the body scrolls horizontally; if it is smaller the columns
- * simply leave whitespace on the right — matching the standard grid.
+ * simply leave whitespace on the right: matching the standard grid.
  */
 export function resolveColumnWidth(visualSizeFactor: number | undefined): number {
     return typeof visualSizeFactor === "number" && visualSizeFactor >= MIN_COLUMN_WIDTH

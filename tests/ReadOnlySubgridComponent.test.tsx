@@ -115,7 +115,7 @@ describe("ReadOnlySubgridComponent", () => {
         expect(link).toBeTruthy();
         expect(link.textContent).toBe("Jane Doe");
         fireEvent.click(link);
-        // Lookup target (contact / c1), and exactly once — the row handler
+        // Lookup target (contact / c1), and exactly once: the row handler
         // must not also fire because the link stops propagation.
         expect(onOpenRecord).toHaveBeenCalledTimes(1);
         expect(onOpenRecord).toHaveBeenCalledWith("contact", "c1");
