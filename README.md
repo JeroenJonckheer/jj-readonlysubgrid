@@ -48,16 +48,37 @@ npm test           # jest unit + render tests
 
 ## Deploy
 
-Push the control straight into a Dataverse environment with your publisher prefix:
+### Easiest — import the managed solution
+
+1. Grab **`JJReadOnlySubgrid_managed.zip`** from the [latest release](https://github.com/JeroenJonckheer/jj-readonlysubgrid/releases/latest).
+2. In Power Apps → **Solutions** → **Import solution** → upload the zip → Next → Import.
+3. Publish all customizations.
+
+The control appears in Dataverse as **`jj_Grids.ReadOnlySubgrid`** and is ready to pick on any subgrid. No build chain required.
+
+> An unmanaged zip (`JJReadOnlySubgrid_unmanaged.zip`) is published next to the managed one for sandbox / customization scenarios.
+
+### For developers — `pac pcf push`
+
+If you are iterating on the source, push straight into your environment:
 
 ```bash
 pac auth create --environment https://<your-org>.crm.dynamics.com
 pac pcf push --publisher-prefix jj
 ```
 
-This builds and imports the control as `jj_Grids.ReadOnlySubgrid`. After import, edit a form, select a subgrid, and set its control to **Read-only Subgrid**.
+This builds and imports the control under a temporary solution wrapper. Use this loop while developing; use the managed zip for production.
 
-> Alternatively, build the managed/unmanaged solution from `Solution/` and import the `.zip`.
+### Build the solution from source
+
+```bash
+npm install
+npm run build
+dotnet build Solution/Solution.cdsproj -c Release -p:SolutionPackageType=Managed
+# -> Solution/bin/Release/Solution.zip
+```
+
+After import (any of the routes above), edit a form, select a subgrid, and set its control to **Read-only Subgrid**.
 
 ## Configure on a form
 

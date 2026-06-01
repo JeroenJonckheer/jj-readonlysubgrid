@@ -31,3 +31,6 @@ harness/*.map
 # Wiki staging + clone (the wiki is a separate Git repo, not part of this one)
 wiki/
 .wiki-clone/
+
+# Local renamed solution zips ready for upload to a GitHub release
+dist/
