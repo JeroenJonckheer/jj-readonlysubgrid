@@ -2,31 +2,65 @@
  * Author: Jeroen Jonckheer
  * Demo choreography for the README recording.
  *
- * All interactions go via explicit page.mouse.move(..., {steps}) so the
- * synthetic cursor injected by the harness (DemoCursor in demo.tsx) glides
- * smoothly across the screen, and via separate down/up so the click pulse
- * is captured on screen. Targets are resolved through their boundingBox so
- * the move ends at the centre of the element about to be clicked.
+ * Key constraints driving the design:
+ *
+ *   - Playwright's headless Chromium does NOT paint the OS cursor into the
+ *     recording, so the harness injects a synthetic cursor (DemoCursor in
+ *     demo.tsx) that follows `mousemove` events. This file makes sure those
+ *     events are actually dispatched along the visible path.
+ *
+ *   - `page.mouse.move(x, y, { steps: N })` does dispatch N intermediate
+ *     mousemove events, but with no delay between them - they all fire in
+ *     a single microtask burst, so the browser never paints intermediate
+ *     frames and the synthetic cursor appears to teleport. We therefore do
+ *     the interpolation ourselves with a small `waitForTimeout` per step,
+ *     so every step gets at least one paint frame and the cursor visibly
+ *     glides between two points.
+ *
+ *   - Menu items are deliberately HOVERED with the cursor at their centre
+ *     before being clicked, so Fluent's row highlight is captured.
  */
 import { test, expect, Page, Locator } from "@playwright/test";
 
-const STEPS = 22; // intermediate mousemove events per traversal
+// Track the cursor position ourselves - Playwright does not expose it.
+let curX = 0;
+let curY = 0;
 
-async function moveTo(page: Page, loc: Locator, settle = 140): Promise<void> {
+async function glideTo(
+    page: Page,
+    toX: number,
+    toY: number,
+    steps = 26,
+    perStepDelay = 18
+): Promise<void> {
+    const startX = curX;
+    const startY = curY;
+    for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        await page.mouse.move(startX + (toX - startX) * t, startY + (toY - startY) * t);
+        if (perStepDelay) await page.waitForTimeout(perStepDelay);
+    }
+    curX = toX;
+    curY = toY;
+}
+
+async function moveTo(page: Page, loc: Locator, settle = 220): Promise<void> {
     const box = await loc.boundingBox();
     if (!box) throw new Error("no boundingBox for locator");
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
-        steps: STEPS,
-    });
+    await glideTo(page, box.x + box.width / 2, box.y + box.height / 2);
     if (settle) await page.waitForTimeout(settle);
 }
 
-async function moveAndClick(page: Page, loc: Locator): Promise<void> {
-    await moveTo(page, loc, 180);
+async function clickInPlace(page: Page, holdMs = 90, afterMs = 220): Promise<void> {
     await page.mouse.down();
-    await page.waitForTimeout(90);
+    await page.waitForTimeout(holdMs);
     await page.mouse.up();
-    await page.waitForTimeout(220);
+    if (afterMs) await page.waitForTimeout(afterMs);
+}
+
+async function moveAndClick(page: Page, loc: Locator): Promise<void> {
+    await moveTo(page, loc);
+    await clickInPlace(page);
 }
 
 async function openHeaderMenu(page: Page, columnName: string): Promise<void> {
@@ -42,17 +76,13 @@ async function openHeaderMenu(page: Page, columnName: string): Promise<void> {
 
 async function pickMenuItem(page: Page, label: string): Promise<void> {
     const item = page.getByRole("menuitem", { name: label });
-    // Hover the item briefly so Fluent's row highlight is visible before
-    // the click, then click in place.
-    await moveTo(page, item, 320);
-    await page.mouse.down();
-    await page.waitForTimeout(90);
-    await page.mouse.up();
-    await page.waitForTimeout(900); // let the action visibly take effect
+    // Move first so the cursor visibly traverses the menu and lands on the
+    // item; then a small hold lets Fluent highlight it; then click.
+    await moveTo(page, item, 380);
+    await clickInPlace(page, 90, 900);
 }
 
 test("read-only subgrid demo", async ({ page }) => {
-    page.on("console", (m) => console.log("BROWSER:", m.type(), m.text()));
     page.on("pageerror", (e) => console.log("PAGEERROR:", e.message));
     page.on("response", (r) => {
         if (r.status() >= 400) console.log("HTTP", r.status(), r.url());
@@ -64,15 +94,19 @@ test("read-only subgrid demo", async ({ page }) => {
         const d = document as unknown as { fonts?: { ready?: Promise<unknown> } };
         return d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
     });
-    await page.waitForTimeout(500);
-
-    // Park the cursor somewhere visible above the grid so the first move
-    // glides in from a natural starting point (not from off-screen).
-    await page.mouse.move(120, 80, { steps: 1 });
+    // Belt-and-braces wait: fonts.ready can resolve before the icon woff2 is
+    // actually rendered, so we hold here too. The first 3 seconds of the
+    // recording are trimmed anyway (see Demo & Media wiki).
     await page.waitForTimeout(800);
 
+    // Park the synthetic cursor visibly above the grid as the starting point.
+    await page.mouse.move(120, 80);
+    curX = 120;
+    curY = 80;
+    await page.waitForTimeout(600);
+
     // ---- Scroll through the rows -------------------------------------------
-    await moveTo(page, page.locator(".jj-readonly-subgrid-body"), 220);
+    await moveTo(page, page.locator(".jj-readonly-subgrid-body"), 250);
     await page.mouse.wheel(0, 220);
     await page.waitForTimeout(700);
     await page.mouse.wheel(0, 220);
@@ -103,15 +137,11 @@ test("read-only subgrid demo", async ({ page }) => {
     await moveAndClick(page, page.getByRole("button", { name: "Wissen" }));
     await page.waitForTimeout(800);
 
-    // ---- Open a record via the Account link --------------------------------
+    // ---- Hover + click the first Account lookup link -----------------------
     const link = page.locator(".jj-readonly-subgrid-link").first();
     await link.scrollIntoViewIfNeeded();
-    await moveTo(page, link, 350); // hover so the link underline shows
-    await page.mouse.down();
-    await page.waitForTimeout(90);
-    await page.mouse.up();
-    await page.waitForTimeout(900);
+    await moveTo(page, link, 420);
+    await clickInPlace(page, 90, 900);
 
-    // Smoke assertion so the test is also a sanity check, not just a recorder.
     await expect(page.locator(".jj-readonly-subgrid-row").first()).toBeVisible();
 });
