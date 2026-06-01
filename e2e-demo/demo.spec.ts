@@ -29,8 +29,18 @@ test("read-only subgrid demo", async ({ page }) => {
     page.on("response", (r) => {
         if (r.status() >= 400) console.log("HTTP", r.status(), r.url());
     });
-    await page.goto("/index.html");
+    await page.goto("/index.html", { waitUntil: "networkidle" });
     await page.waitForSelector(".jj-readonly-subgrid-row", { timeout: 8000 });
+    // Wait for Fluent UI's icon font(s) to finish downloading - otherwise
+    // the header chevrons render as placeholder squares for the first few
+    // hundred ms while the woff2 is still in flight.
+    await page.evaluate(() => {
+        const d = document as unknown as { fonts?: { ready?: Promise<unknown> } };
+        return d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
+    });
+    // Small settle so the first paint after the font lands isn't captured
+    // mid-swap.
+    await page.waitForTimeout(400);
     // Hold on the populated grid.
     await page.waitForTimeout(1500);
 
