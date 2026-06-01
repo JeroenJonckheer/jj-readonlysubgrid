@@ -47,7 +47,10 @@ html, body {
 }
 
 /* Synthetic cursor for the recording (Playwright headless doesn't render
-   the OS cursor). Positioned by JS via mousemove. */
+   the OS cursor). Positioned by JS via mousemove.
+   z-index must beat Fluent UI's Layer (ZIndexes.Layer = 1,000,000) used by
+   ContextualMenu, Callout and Dialog - otherwise the cursor disappears
+   under the open menu while it glides across the items. Max int wins. */
 .demo-cursor {
     position: fixed;
     left: 0;
@@ -55,7 +58,7 @@ html, body {
     width: 22px;
     height: 26px;
     pointer-events: none;
-    z-index: 99999;
+    z-index: 2147483647;
     transform: translate(-100px, -100px);
     will-change: transform;
 }
