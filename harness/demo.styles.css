@@ -46,6 +46,29 @@ html, body {
     color: #323130;
 }
 
+/* Synthetic cursor for the recording (Playwright headless doesn't render
+   the OS cursor). Positioned by JS via mousemove. */
+.demo-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 22px;
+    height: 26px;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-100px, -100px);
+    will-change: transform;
+}
+.demo-cursor svg {
+    display: block;
+    /* The tip of the arrow sits at the SVG origin, so no offset needed. */
+}
+.demo-cursor.is-press svg {
+    transform: scale(0.88);
+    filter: drop-shadow(0 0 6px rgba(0, 120, 212, 0.85));
+    transition: transform 60ms ease;
+}
+
 .demo-grid {
     padding: 0;
 }

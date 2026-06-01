@@ -24,6 +24,47 @@ import { makeDataset, MockColumn, MockRecordSpec } from "../tests/mockDataset";
 
 initializeIcons();
 
+// Synthetic cursor overlay: Playwright's headless Chromium does NOT paint
+// the OS mouse cursor into recorded frames, so without this every click in
+// the demo looks like things happen by magic. We render an SVG arrow that
+// follows mousemove events (driven by `page.mouse.move`) and briefly
+// highlights on mousedown so clicks are visible too.
+const DemoCursor: React.FC = () => {
+    const ref = React.useRef<HTMLDivElement | null>(null);
+    React.useEffect(() => {
+        const move = (e: MouseEvent) => {
+            const el = ref.current;
+            if (el) {
+                el.style.transform =
+                    "translate(" + e.clientX + "px," + e.clientY + "px)";
+            }
+        };
+        const down = () => ref.current && ref.current.classList.add("is-press");
+        const up = () => ref.current && ref.current.classList.remove("is-press");
+        window.addEventListener("mousemove", move);
+        window.addEventListener("mousedown", down);
+        window.addEventListener("mouseup", up);
+        return () => {
+            window.removeEventListener("mousemove", move);
+            window.removeEventListener("mousedown", down);
+            window.removeEventListener("mouseup", up);
+        };
+    }, []);
+    return (
+        <div ref={ref} className="demo-cursor" aria-hidden="true">
+            <svg width="22" height="26" viewBox="0 0 22 26">
+                <path
+                    d="M2 2 L2 22 L7 17 L11 25 L14 24 L10 16 L17 16 Z"
+                    fill="#000"
+                    stroke="#fff"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                />
+            </svg>
+        </div>
+    );
+};
+
 // Account and Contact are lookup columns (as in a typical model-driven view),
 // so the control renders them as clickable links to the related record -
 // exactly like the live grid. The remaining columns are plain text.
@@ -116,6 +157,7 @@ const DemoApp: React.FC = () => {
                     />
                 </div>
             </div>
+            <DemoCursor />
         </div>
     );
 };

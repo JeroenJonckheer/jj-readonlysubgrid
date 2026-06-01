@@ -1,26 +1,54 @@
 /*
  * Author: Jeroen Jonckheer
- * Demo choreography: drives the real ReadOnlySubgrid control through its
- * headline features at a calm pace so the recorded video reads well as a
- * looping GIF. Playwright records the whole run to demo-output/.../video.webm.
+ * Demo choreography for the README recording.
+ *
+ * All interactions go via explicit page.mouse.move(..., {steps}) so the
+ * synthetic cursor injected by the harness (DemoCursor in demo.tsx) glides
+ * smoothly across the screen, and via separate down/up so the click pulse
+ * is captured on screen. Targets are resolved through their boundingBox so
+ * the move ends at the centre of the element about to be clicked.
  */
-import { test, expect, Page } from "@playwright/test";
+import { test, expect, Page, Locator } from "@playwright/test";
 
-// Open a column's header dropdown by the column's display name.
+const STEPS = 22; // intermediate mousemove events per traversal
+
+async function moveTo(page: Page, loc: Locator, settle = 140): Promise<void> {
+    const box = await loc.boundingBox();
+    if (!box) throw new Error("no boundingBox for locator");
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+        steps: STEPS,
+    });
+    if (settle) await page.waitForTimeout(settle);
+}
+
+async function moveAndClick(page: Page, loc: Locator): Promise<void> {
+    await moveTo(page, loc, 180);
+    await page.mouse.down();
+    await page.waitForTimeout(90);
+    await page.mouse.up();
+    await page.waitForTimeout(220);
+}
+
 async function openHeaderMenu(page: Page, columnName: string): Promise<void> {
-    await page
+    const cell = page
         .locator(".jj-readonly-subgrid-header-area .ms-DetailsHeader-cell", {
             hasText: columnName,
         })
-        .first()
-        .click();
+        .first();
+    await moveAndClick(page, cell);
     await page.waitForSelector(".ms-ContextualMenu-list");
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(450);
 }
 
-async function clickMenuItem(page: Page, label: string): Promise<void> {
-    await page.getByRole("menuitem", { name: label }).click();
-    await page.waitForTimeout(1200);
+async function pickMenuItem(page: Page, label: string): Promise<void> {
+    const item = page.getByRole("menuitem", { name: label });
+    // Hover the item briefly so Fluent's row highlight is visible before
+    // the click, then click in place.
+    await moveTo(page, item, 320);
+    await page.mouse.down();
+    await page.waitForTimeout(90);
+    await page.mouse.up();
+    await page.waitForTimeout(900); // let the action visibly take effect
 }
 
 test("read-only subgrid demo", async ({ page }) => {
@@ -29,64 +57,61 @@ test("read-only subgrid demo", async ({ page }) => {
     page.on("response", (r) => {
         if (r.status() >= 400) console.log("HTTP", r.status(), r.url());
     });
+
     await page.goto("/index.html", { waitUntil: "networkidle" });
     await page.waitForSelector(".jj-readonly-subgrid-row", { timeout: 8000 });
-    // Wait for Fluent UI's icon font(s) to finish downloading - otherwise
-    // the header chevrons render as placeholder squares for the first few
-    // hundred ms while the woff2 is still in flight.
     await page.evaluate(() => {
         const d = document as unknown as { fonts?: { ready?: Promise<unknown> } };
         return d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve();
     });
-    // Small settle so the first paint after the font lands isn't captured
-    // mid-swap.
-    await page.waitForTimeout(400);
-    // Hold on the populated grid.
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(500);
 
-    // 1) Scroll through the rows (shows the sticky header + native scroll).
-    const body = page.locator(".jj-readonly-subgrid-body");
-    await body.hover();
-    await page.mouse.wheel(0, 260);
+    // Park the cursor somewhere visible above the grid so the first move
+    // glides in from a natural starting point (not from off-screen).
+    await page.mouse.move(120, 80, { steps: 1 });
     await page.waitForTimeout(800);
-    await page.mouse.wheel(0, 260);
-    await page.waitForTimeout(800);
-    await page.mouse.wheel(0, -520);
+
+    // ---- Scroll through the rows -------------------------------------------
+    await moveTo(page, page.locator(".jj-readonly-subgrid-body"), 220);
+    await page.mouse.wheel(0, 220);
     await page.waitForTimeout(700);
+    await page.mouse.wheel(0, 220);
+    await page.waitForTimeout(700);
+    await page.mouse.wheel(0, -440);
+    await page.waitForTimeout(600);
 
-    // 2) Sort A->Z then Z->A on Account (server-side style re-sort).
+    // ---- Sort: Account A->Z then Z->A --------------------------------------
     await openHeaderMenu(page, "Account");
-    await clickMenuItem(page, "A to Z");
+    await pickMenuItem(page, "A to Z");
     await openHeaderMenu(page, "Account");
-    await clickMenuItem(page, "Z to A");
+    await pickMenuItem(page, "Z to A");
 
-    // 3) Group by City, then ungroup.
+    // ---- Group by City, then ungroup ---------------------------------------
     await openHeaderMenu(page, "City");
-    await clickMenuItem(page, "Group by");
-    await page.waitForTimeout(800);
+    await pickMenuItem(page, "Group by");
+    await page.waitForTimeout(700);
     await openHeaderMenu(page, "City");
-    await clickMenuItem(page, "Ungroup");
+    await pickMenuItem(page, "Ungroup");
 
-    // 4) Filter Account contains "cor" (narrows to the Corporations).
+    // ---- Filter Account contains "cor" -------------------------------------
     await openHeaderMenu(page, "Account");
-    await clickMenuItem(page, "Filter by");
+    await pickMenuItem(page, "Filter by");
     const filterBox = page.getByPlaceholder("typ om te filteren");
-    await filterBox.click();
-    for (const ch of "cor") {
-        await filterBox.type(ch, { delay: 140 });
-    }
-    await page.waitForTimeout(1500);
-    await page.getByRole("button", { name: "Wissen" }).click();
-    await page.waitForTimeout(900);
+    await moveAndClick(page, filterBox);
+    await page.keyboard.type("cor", { delay: 160 });
+    await page.waitForTimeout(1400);
+    await moveAndClick(page, page.getByRole("button", { name: "Wissen" }));
+    await page.waitForTimeout(800);
 
-    // 5) Click a lookup link -> opens the related record (toast in the demo).
+    // ---- Open a record via the Account link --------------------------------
     const link = page.locator(".jj-readonly-subgrid-link").first();
     await link.scrollIntoViewIfNeeded();
-    await link.hover();
-    await page.waitForTimeout(500);
-    await link.click();
-    await page.waitForTimeout(800);
+    await moveTo(page, link, 350); // hover so the link underline shows
+    await page.mouse.down();
+    await page.waitForTimeout(90);
+    await page.mouse.up();
+    await page.waitForTimeout(900);
 
-    // Sanity assertion so the test is also a smoke test, not just a recorder.
+    // Smoke assertion so the test is also a sanity check, not just a recorder.
     await expect(page.locator(".jj-readonly-subgrid-row").first()).toBeVisible();
 });
