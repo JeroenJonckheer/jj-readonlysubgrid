@@ -31,12 +31,6 @@ What you get is the exact same subgrid your users are used to — sorting, group
 - **Resilient** — a single malformed record or unreadable column never blanks the whole grid.
 - **Localized strings** — Dutch UI labels (easily extendable via the resx).
 
-## Demo
-
-A recorded demo (and the GIF embedded above) shows: opening a record from a row, following a lookup link, sorting, grouping, filtering and resizing columns.
-
-> The GIF is produced from a short screen recording of the control on a live form, converted with `ffmpeg`. See the [Demo & Media](https://github.com/JeroenJonckheer/jj-readonlysubgrid/wiki/Demo-and-Media) wiki page for the exact command.
-
 ## Requirements
 
 - [Node.js](https://nodejs.org/) 18+
